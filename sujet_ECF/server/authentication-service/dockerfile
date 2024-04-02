@@ -1,0 +1,25 @@
+FROM maven AS build 
+
+WORKDIR /app
+
+COPY pom.xml ./
+RUN mvn dependency:go-offline
+
+COPY src ./src 
+RUN mvn package -DskipTests 
+
+
+FROM openjdk AS deploy
+
+WORKDIR /app
+
+COPY --from=build /app/target/authentication-service.jar .
+
+EXPOSE ${AUTHENTICATION_SERVICE_PORT}
+
+CMD ["java","-jar","payment-service.jar"]
+
+
+# et dans le terminal 
+# docker build --no-cache -t authserv .
+# docker run --name containerauthserv -p 9091:7000 -d authserv

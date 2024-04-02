@@ -1,0 +1,25 @@
+FROM maven AS build 
+
+WORKDIR /app
+
+COPY pom.xml ./
+RUN mvn dependency:go-offline
+
+COPY src ./src 
+RUN mvn package -DskipTests 
+
+
+FROM openjdk AS deploy
+
+WORKDIR /app
+
+COPY --from=build /app/target/search-suggestion-service.jar .
+
+EXPOSE ${SEARCH_SUGGESTION_SERVICE_PORT}
+
+CMD ["java", "-jar", "search-suggestion-service.jar"]
+
+
+# et dans le terminal 
+# docker build --no-cache -t paymentserv .
+# docker run --name containerpaymentserv -p 9093:950 -d paymeentserv

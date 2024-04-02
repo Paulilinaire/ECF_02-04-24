@@ -1,0 +1,96 @@
+version: "3"
+
+services:
+  # Database
+  bdd:
+    container_name: bdd
+    image: mysql
+    volumes:
+      - ecommerce_app_database:/var/lib/mysql
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mypass
+      MYSQL_DATABASE: mysqluser
+      MYSQL_PASSWORD: mypass
+
+  # Backend - Authentication Service
+  authserv-docker-container:
+    container_name: authserv
+    ports:
+      - "7000:7000"
+    build:
+      context: ./server/authentication-service
+      dockerfile: dockerfile
+    environment:
+      ACTIVE_PROFILE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    depends_on:
+      - bdd
+
+  # Backend - Payment Service
+  paymentserv-docker-container:
+    container_name: paymentserv
+    ports:
+      - "9050:9050"
+    build:
+      context: ./server/payment-service
+      dockerfile: dockerfile
+    environment:
+      ACTIVE_PROFILE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+
+    depends_on:
+      - bdd
+
+  # Backend - Common Data Service
+  commondata-docker-container:
+    container_name: commondata
+    ports:
+      - "9000:9000"
+    build:
+      context: ./server/common-data-service
+      dockerfile: dockerfile
+    environment:
+      ACTIVE_PROFILE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    depends_on:
+      - bdd
+
+  # Backend - Search Suggestion Service
+  searchserv-docker-container:
+    container_name: searchserv
+    ports:
+      - "10000:10000"
+    build:
+      context: ./server/search-suggestion-service
+      dockerfile: dockerfile
+    environment:
+      ACTIVE_PROFILE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    depends_on:
+      - bdd
+
+  # Frontend
+  react-nginx:
+    build:
+      context: ./client
+      dockerfile: dockerfile
+    container_name: react-nginx
+    ports:
+      - "80:80"
+    environment:
+      ACTIVE_PROFILE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    depends_on:
+      - authserv-docker-container
+
+volumes:
+  ecommerce_app_database:
+
+
+
+
+# docker-compose up -d
+# docker-compose down
