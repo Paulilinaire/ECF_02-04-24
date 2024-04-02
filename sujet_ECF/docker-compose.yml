@@ -6,91 +6,108 @@ services:
     container_name: bdd
     image: mysql
     volumes:
-      - ecommerce_app_database:/var/lib/mysql
+      - db_data:/var/lib/mysql
     restart: always
     ports:
-      - "3307:3306"
+      - "3307:${DB_PORT}"  
     environment:
-      MYSQL_ROOT_PASSWORD: mypass
-      MYSQL_DATABASE: mysqluser
-      MYSQL_PASSWORD: mypass
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    networks:
+      - network-e-commerce
 
   # Backend - Authentication Service
-  authserv-docker-container:
-    container_name: authserv
+  authentication-service:
+    container_name: authentication-service
     ports:
-      - "7000:7000"
+      - "${AUTHENTICATION_SERVICE_PORT}:${AUTHENTICATION_SERVICE_PORT}"  
     build:
       context: ./server/authentication-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     environment:
-      ACTIVE_PROFILE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-    depends_on:
-      - bdd
+      PORT: ${AUTHENTICATION_SERVICE_PORT}
+      ACTIVE_PROFILE: ${ACTIVE_PROFILE}
+      DB_HOST: bdd
+      DB_PORT: ${DB_PORT}
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    networks:
+      - network-e-commerce
 
   # Backend - Payment Service
-  paymentserv-docker-container:
-    container_name: paymentserv
+  payment-service:
+    container_name: payment-service
     ports:
-      - "9050:9050"
+      - "${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}"  
     build:
       context: ./server/payment-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     environment:
-      ACTIVE_PROFILE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-
-    depends_on:
-      - bdd
+      PORT: ${PAYMENT_SERVICE_PORT}
+      DB_PORT: ${DB_PORT}
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    networks:
+      - network-e-commerce
 
   # Backend - Common Data Service
-  commondata-docker-container:
-    container_name: commondata
+  common-data-service:
+    container_name: common-data-service
     ports:
-      - "9000:9000"
+      - "${COMMON_DATA_SERVICE_PORT}:${COMMON_DATA_SERVICE_PORT}" 
     build:
       context: ./server/common-data-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     environment:
-      ACTIVE_PROFILE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-    depends_on:
-      - bdd
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  
+      MYSQL_DATABASE: ${MYSQL_DATABASE}  
+      REDIS_HOST: ${REDIS_HOST}  
+      REDIS_PASSWORD: ${REDIS_PASSWORD}  
+      REDIS_PORT: ${REDIS_PORT}
+      PORT: ${COMMON_DATA_SERVICE_PORT}
+      ACTIVE_PROFILE: ${ACTIVE_PROFILE}
+      DB_HOST: bdd
+      DB_PORT: ${DB_PORT}
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    networks:
+      - network-e-commerce
 
   # Backend - Search Suggestion Service
-  searchserv-docker-container:
-    container_name: searchserv
+  search-suggestion-service:
+    container_name: search-suggestion-service
     ports:
-      - "10000:10000"
+      - "${SEARCH_SUGGESTION_SERVICE_PORT}:${SEARCH_SUGGESTION_SERVICE_PORT}"  
     build:
       context: ./server/search-suggestion-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     environment:
-      ACTIVE_PROFILE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-    depends_on:
-      - bdd
+      PORT: ${SEARCH_SUGGESTION_SERVICE_PORT}
+      DB_PORT: ${DB_PORT}
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    networks:
+      - network-e-commerce
 
   # Frontend
   react-nginx:
     build:
       context: ./client
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     container_name: react-nginx
     ports:
-      - "80:80"
-    environment:
-      ACTIVE_PROFILE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_SCHEMA}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-    depends_on:
-      - authserv-docker-container
+      - "80:${REACT_APP_PORT}"  
+    networks:
+      - network-e-commerce
+
+networks:
+  network-e-commerce:
+    driver: bridge
+
 
 volumes:
-  ecommerce_app_database:
-
-
-
-
-# docker-compose up -d
-# docker-compose down
+  db_data:
