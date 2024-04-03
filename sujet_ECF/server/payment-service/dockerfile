@@ -6,7 +6,7 @@ COPY pom.xml ./
 RUN mvn dependency:go-offline
 
 COPY src ./src 
-RUN mvn package -DskipTests 
+RUN mvn clean package -DskipTests 
 
 
 FROM openjdk AS deploy
@@ -15,11 +15,9 @@ WORKDIR /app
 
 COPY --from=build /app/target/payment-service.jar .
 
-EXPOSE ${AUTHENTICATION_SERVICE_PORT}
+EXPOSE ${PAYMENT_SERVICE_PORT}
 
 CMD ["java", "-jar", "payment-service.jar"]
 
 
-# et dans le terminal 
-# docker build --no-cache -t paymentserv .
-# docker run --name containerpaymentserv -p 9093:950 -d paymeentserv
+

@@ -6,7 +6,7 @@ COPY pom.xml ./
 RUN mvn dependency:go-offline
 
 COPY src ./src 
-RUN mvn package -DskipTests 
+RUN mvn clean package -DskipTests 
 
 
 FROM openjdk AS deploy
@@ -20,6 +20,3 @@ EXPOSE ${COMMON_DATA_SERVICE_PORT}
 CMD ["java", "-jar", "common-data-service.jar"]
 
 
-# et dans le terminal 
-# docker build --no-cache -t commondataserv .
-# docker run --name containercommondataserv -p 9092:9000 -d commondataserv

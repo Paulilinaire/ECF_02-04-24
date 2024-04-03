@@ -17,9 +17,5 @@ COPY --from=build /app/target/authentication-service.jar .
 
 EXPOSE ${AUTHENTICATION_SERVICE_PORT}
 
-CMD ["java","-jar","payment-service.jar"]
+CMD ["java","-jar","authentication-service.jar"]
 
-
-# et dans le terminal 
-# docker build --no-cache -t authserv .
-# docker run --name containerauthserv -p 9091:7000 -d authserv
