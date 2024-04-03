@@ -80,7 +80,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: 6379
+      REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       PORT: ${COMMON_DATA_SERVICE_PORT}
       ACTIVE_PROFILE: ${ACTIVE_PROFILE}
@@ -91,30 +91,28 @@ services:
       DB_PASS: ${DB_PASS}
     networks:
       - network-e-commerce
+      
 
   # Backend - Search Suggestion Service
-  # search-suggestion-service:
-  #   container_name: search-suggestion-service
-  #   ports:
-  #     - "${SEARCH_SUGGESTION_SERVICE_PORT}:${SEARCH_SUGGESTION_SERVICE_PORT}"  
-  #   build:
-  #     context: ./server/search-suggestion-service
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  
-  #     MYSQL_DATABASE: ${MYSQL_DATABASE}  
-  #     REDIS_HOST: ${REDIS_HOST}
-  #     REDIS_PORT: 6379
-  #     REDIS_PASSWORD: ${REDIS_PASSWORD}
-  #     PORT: ${SEARCH_SUGGESTION_SERVICE_PORT}
-  #     ACTIVE_PROFILE: ${ACTIVE_PROFILE}
-  #     DB_HOST: bdd
-  #     DB_PORT: ${DB_PORT}
-  #     DB_SCHEMA: ${DB_SCHEMA}
-  #     DB_USER: ${DB_USER}
-  #     DB_PASS: ${DB_PASS}
-  #   networks:
-  #     - network-e-commerce
+  search-suggestion-service:
+    container_name: search-suggestion-service
+    ports:
+      - "${SEARCH_SUGGESTION_SERVICE_PORT}:${SEARCH_SUGGESTION_SERVICE_PORT}"  
+    build:
+      context: ./server/search-suggestion-service
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  
+      MYSQL_DATABASE: ${MYSQL_DATABASE}  
+      PORT: ${SEARCH_SUGGESTION_SERVICE_PORT}
+      ACTIVE_PROFILE: ${ACTIVE_PROFILE}
+      DB_HOST: bdd
+      DB_PORT: ${DB_PORT}
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+    networks:
+      - network-e-commerce
 
 
   # Frontend
